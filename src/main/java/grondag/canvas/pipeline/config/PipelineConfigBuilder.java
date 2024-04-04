@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.util.NoSuchElementException;
 
 import blue.endless.jankson.JsonArray;
+import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.api.SyntaxError;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
@@ -77,20 +78,19 @@ public class PipelineConfigBuilder {
 	public MaterialProgramConfig materialProgram;
 
 	/**
-	 * Priority-pass loading. Loads options before anything else. This is necessary for the
-	 * current design of {@link grondag.canvas.pipeline.config.util.DynamicLoader}, at the cost
-	 * of reading the disk twice.
+	 * Preload options before anything else. This is necessary for the
+	 * current design of {@link grondag.canvas.pipeline.config.util.DynamicLoader}.
 	 *
 	 * @param configJson the json file being read
 	 */
-	public void loadPriority(JsonObject configJson) {
+	public void preload(JsonObject configJson) {
 		LoadHelper.loadList(context, configJson, "options", options, OptionConfig::new);
 	}
 
 	/**
 	 * Initialize the options immediately after all of them are loaded.
 	 */
-	private void afterLoadPriority() {
+	private void initializeOptions() {
 		ConfigManager.initPipelineOptions(prebuiltOptions = options.toArray(new OptionConfig[options.size()]));
 	}
 
@@ -214,30 +214,34 @@ public class PipelineConfigBuilder {
 		}
 
 		final PipelineConfigBuilder result = new PipelineConfigBuilder();
+
+		final ObjectArrayFIFOQueue<JsonElement> dynamicQueue = new ObjectArrayFIFOQueue<>();
 		final ObjectOpenHashSet<ResourceLocation> included = new ObjectOpenHashSet<>();
-		final ObjectArrayFIFOQueue<ResourceLocation> readQueue = new ObjectArrayFIFOQueue<>();
-		final ObjectArrayFIFOQueue<JsonObject> primaryLoadQueue = new ObjectArrayFIFOQueue<>();
-		final ObjectArrayFIFOQueue<JsonObject> secondLoadQueue = new ObjectArrayFIFOQueue<>();
 
-		readQueue.enqueue(id);
-		included.add(id);
+		final ObjectArrayFIFOQueue<JsonObject> preloadQueue = new ObjectArrayFIFOQueue<>();
+		readRecursive(rm, dynamicQueue, included, preloadQueue, id);
 
-		while (!readQueue.isEmpty()) {
-			final ResourceLocation target = readQueue.dequeue();
-			readResource(target, readQueue, primaryLoadQueue, included, rm);
+		final ObjectArrayFIFOQueue<JsonObject> loadQueue = new ObjectArrayFIFOQueue<>(preloadQueue.size());
+
+		while (!preloadQueue.isEmpty()) {
+			final JsonObject target = preloadQueue.dequeue();
+			loadQueue.enqueue(target);
+			result.preload(target);
 		}
 
-		while (!primaryLoadQueue.isEmpty()) {
-			final JsonObject target = primaryLoadQueue.dequeue();
-			secondLoadQueue.enqueue(target);
-			result.loadPriority(target);
+		result.initializeOptions();
+
+		// dynamic read. NB: pipeline options found here aren't loaded as dynamically-existing options doesn't make sense.
+		while (!dynamicQueue.isEmpty()) {
+			String optionalId = result.context.dynamic.getString(dynamicQueue.dequeue());
+
+			if (optionalId != null && !optionalId.isEmpty()) {
+				readRecursive(rm, dynamicQueue, included, loadQueue, new ResourceLocation(optionalId));
+			}
 		}
 
-		result.afterLoadPriority();
-
-		while (!secondLoadQueue.isEmpty()) {
-			final JsonObject target = secondLoadQueue.dequeue();
-			result.load(target);
+		while (!loadQueue.isEmpty()) {
+			result.load(loadQueue.dequeue());
 		}
 
 		if (result.validate()) {
@@ -248,9 +252,15 @@ public class PipelineConfigBuilder {
 		}
 	}
 
-	private static void readResource(ResourceLocation target, ObjectArrayFIFOQueue<ResourceLocation> queue, ObjectArrayFIFOQueue<JsonObject> loadQueue, ObjectOpenHashSet<ResourceLocation> included, ResourceManager rm) {
+	private static void readRecursive(ResourceManager rm, ObjectArrayFIFOQueue<JsonElement> optionalQueue, ObjectOpenHashSet<ResourceLocation> included, ObjectArrayFIFOQueue<JsonObject> loadQueue, ResourceLocation target) {
+		if (!included.add(target)) {
+			return;
+		}
+
 		// Allow flexibility on JSON vs JSON5 extensions
 		if (rm.getResource(target).isEmpty()) {
+			final var initialTarget = target;
+
 			if (target.getPath().endsWith("json5")) {
 				final var candidate = new ResourceLocation(target.getNamespace(), target.getPath().substring(0, target.getPath().length() - 1));
 
@@ -264,37 +274,43 @@ public class PipelineConfigBuilder {
 					target = candidate;
 				}
 			}
+
+			if (initialTarget != target && !included.add(target)) {
+				return;
+			}
 		}
 
 		try (InputStream inputStream = rm.getResource(target).get().open()) {
 			final JsonObject configJson = ConfigManager.JANKSON.load(inputStream);
 			loadQueue.enqueue(configJson);
-			getIncludes(configJson, included, queue);
+
+			if (configJson.containsKey("include")) {
+				final JsonArray array = JanksonHelper.getJsonArrayOrNull(configJson, "include", "Pipeline config error: 'include' must be an array.");
+				final int limit = array != null ? array.size() : 0;
+
+				for (int i = 0; i < limit; ++i) {
+					final String idString = JanksonHelper.asString(array.get(i));
+
+					if (idString != null && !idString.isEmpty()) {
+						final ResourceLocation id = new ResourceLocation(idString);
+
+						readRecursive(rm, optionalQueue, included, loadQueue, id);
+					}
+				}
+			}
+
+			if (configJson.containsKey("includeOptional")) {
+				final JsonArray array = JanksonHelper.getJsonArrayOrNull(configJson, "includeOptional", "Pipeline config error: 'includeOptional' must be an array.");
+				final int limit = array != null ? array.size() : 0;
+
+				for (int i = 0; i < limit; ++i) {
+					optionalQueue.enqueue(array.get(i));
+				}
+			}
 		} catch (final IOException | NoSuchElementException e) {
 			CanvasMod.LOG.warn(String.format("Unable to load pipeline config resource %s due to IOException: %s", target.toString(), e.getLocalizedMessage()));
 		} catch (final SyntaxError e) {
 			CanvasMod.LOG.warn(String.format("Unable to load pipeline config resource %s due to Syntax Error: %s", target.toString(), e.getLocalizedMessage()));
-		}
-	}
-
-	private static void getIncludes(JsonObject configJson, ObjectOpenHashSet<ResourceLocation> included, ObjectArrayFIFOQueue<ResourceLocation> queue) {
-		if (configJson == null || !configJson.containsKey("include")) {
-			return;
-		}
-
-		final JsonArray array = JanksonHelper.getJsonArrayOrNull(configJson, "include", "Pipeline config error: 'include' must be an array.");
-		final int limit = array != null ? array.size() : 0;
-
-		for (int i = 0; i < limit; ++i) {
-			final String idString = JanksonHelper.asString(array.get(i));
-
-			if (idString != null && !idString.isEmpty()) {
-				final ResourceLocation id = new ResourceLocation(idString);
-
-				if (included.add(id)) {
-					queue.enqueue(id);
-				}
-			}
 		}
 	}
 
