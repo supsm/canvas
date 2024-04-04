@@ -78,19 +78,18 @@ public class PipelineConfigBuilder {
 
 	/**
 	 * Priority-pass loading. Loads options before anything else. This is necessary for the
-	 * current design of {@link grondag.canvas.pipeline.config.util.DynamicLoader}, at the cost
-	 * of reading the disk twice.
+	 * current design of {@link grondag.canvas.pipeline.config.util.DynamicLoader}.
 	 *
 	 * @param configJson the json file being read
 	 */
-	public void loadPriority(JsonObject configJson) {
+	public void loadOptions(JsonObject configJson) {
 		LoadHelper.loadList(context, configJson, "options", options, OptionConfig::new);
 	}
 
 	/**
 	 * Initialize the options immediately after all of them are loaded.
 	 */
-	private void afterLoadPriority() {
+	private void initializeOptions() {
 		ConfigManager.initPipelineOptions(prebuiltOptions = options.toArray(new OptionConfig[options.size()]));
 	}
 
@@ -214,29 +213,52 @@ public class PipelineConfigBuilder {
 		}
 
 		final PipelineConfigBuilder result = new PipelineConfigBuilder();
+		final ConfigContext context = result.context;
+
+		final ObjectArrayFIFOQueue<JsonObject> optionQueue = new ObjectArrayFIFOQueue<>();
+		final ObjectArrayFIFOQueue<JsonObject> loadQueue = new ObjectArrayFIFOQueue<>();
+
+		final ObjectArrayFIFOQueue<ResourceLocation> queue = new ObjectArrayFIFOQueue<>();
 		final ObjectOpenHashSet<ResourceLocation> included = new ObjectOpenHashSet<>();
-		final ObjectArrayFIFOQueue<ResourceLocation> readQueue = new ObjectArrayFIFOQueue<>();
-		final ObjectArrayFIFOQueue<JsonObject> primaryLoadQueue = new ObjectArrayFIFOQueue<>();
-		final ObjectArrayFIFOQueue<JsonObject> secondLoadQueue = new ObjectArrayFIFOQueue<>();
 
-		readQueue.enqueue(id);
-		included.add(id);
+		// full read
+		{
+			queue.enqueue(id);
+			included.add(id);
 
-		while (!readQueue.isEmpty()) {
-			final ResourceLocation target = readQueue.dequeue();
-			readResource(target, readQueue, primaryLoadQueue, included, rm);
+			while (!queue.isEmpty()) {
+				final ResourceLocation target = queue.dequeue();
+				readResource(context, rm, queue, included, target, optionQueue, false, true);
+			}
 		}
 
-		while (!primaryLoadQueue.isEmpty()) {
-			final JsonObject target = primaryLoadQueue.dequeue();
-			secondLoadQueue.enqueue(target);
-			result.loadPriority(target);
+		// option load
+		{
+			while (!optionQueue.isEmpty()) {
+				final JsonObject target = optionQueue.dequeue();
+				loadQueue.enqueue(target);
+				result.loadOptions(target);
+			}
+
+			result.initializeOptions();
 		}
 
-		result.afterLoadPriority();
+		// optional read
+		{
+			// read includeOptional only
+			readResource(context, rm, queue, included, id, loadQueue, true, false);
 
-		while (!secondLoadQueue.isEmpty()) {
-			final JsonObject target = secondLoadQueue.dequeue();
+			// read normal include within the included-optional
+			// NB: new options aren't loaded as it won't make sense UI-wise to have new options pop-up/disappear in real time.
+			while (!queue.isEmpty()) {
+				final ResourceLocation target = queue.dequeue();
+				readResource(context, rm, queue, included, target, loadQueue, false, true);
+			}
+		}
+
+		// full load
+		while (!loadQueue.isEmpty()) {
+			final JsonObject target = loadQueue.dequeue();
 			result.load(target);
 		}
 
@@ -248,7 +270,7 @@ public class PipelineConfigBuilder {
 		}
 	}
 
-	private static void readResource(ResourceLocation target, ObjectArrayFIFOQueue<ResourceLocation> queue, ObjectArrayFIFOQueue<JsonObject> loadQueue, ObjectOpenHashSet<ResourceLocation> included, ResourceManager rm) {
+	private static void readResource(ConfigContext context, ResourceManager rm, ObjectArrayFIFOQueue<ResourceLocation> queue, ObjectOpenHashSet<ResourceLocation> included, ResourceLocation target, ObjectArrayFIFOQueue<JsonObject> loadQueue, boolean readOptional, boolean enqueue) {
 		// Allow flexibility on JSON vs JSON5 extensions
 		if (rm.getResource(target).isEmpty()) {
 			if (target.getPath().endsWith("json5")) {
@@ -268,33 +290,35 @@ public class PipelineConfigBuilder {
 
 		try (InputStream inputStream = rm.getResource(target).get().open()) {
 			final JsonObject configJson = ConfigManager.JANKSON.load(inputStream);
-			loadQueue.enqueue(configJson);
-			getIncludes(configJson, included, queue);
+
+			if (enqueue) {
+				loadQueue.enqueue(configJson);
+			}
+
+			final String targetKey = readOptional ? "includeOptional" : "include";
+
+			if (!configJson.containsKey(targetKey)) {
+				return;
+			}
+
+			final JsonArray array = JanksonHelper.getJsonArrayOrNull(configJson, targetKey, "Pipeline config error: 'include' must be an array.");
+			final int limit = array != null ? array.size() : 0;
+
+			for (int i = 0; i < limit; ++i) {
+				final String idString = readOptional ? context.dynamic.getString(array.get(i)) : JanksonHelper.asString(array.get(i));
+
+				if (idString != null && !idString.isEmpty()) {
+					final ResourceLocation id = new ResourceLocation(idString);
+
+					if (included.add(id)) {
+						queue.enqueue(id);
+					}
+				}
+			}
 		} catch (final IOException | NoSuchElementException e) {
 			CanvasMod.LOG.warn(String.format("Unable to load pipeline config resource %s due to IOException: %s", target.toString(), e.getLocalizedMessage()));
 		} catch (final SyntaxError e) {
 			CanvasMod.LOG.warn(String.format("Unable to load pipeline config resource %s due to Syntax Error: %s", target.toString(), e.getLocalizedMessage()));
-		}
-	}
-
-	private static void getIncludes(JsonObject configJson, ObjectOpenHashSet<ResourceLocation> included, ObjectArrayFIFOQueue<ResourceLocation> queue) {
-		if (configJson == null || !configJson.containsKey("include")) {
-			return;
-		}
-
-		final JsonArray array = JanksonHelper.getJsonArrayOrNull(configJson, "include", "Pipeline config error: 'include' must be an array.");
-		final int limit = array != null ? array.size() : 0;
-
-		for (int i = 0; i < limit; ++i) {
-			final String idString = JanksonHelper.asString(array.get(i));
-
-			if (idString != null && !idString.isEmpty()) {
-				final ResourceLocation id = new ResourceLocation(idString);
-
-				if (included.add(id)) {
-					queue.enqueue(id);
-				}
-			}
 		}
 	}
 
