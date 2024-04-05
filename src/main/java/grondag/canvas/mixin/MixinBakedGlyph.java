@@ -59,12 +59,10 @@ public abstract class MixinBakedGlyph {
 	public void render(boolean oblique, float x, float y, Matrix4f matrix4f, VertexConsumer vertexConsumer, float red, float green, float blue, float alpha, int lightmap) {
 		final float x0 = x + left;
 		final float x1 = x + right;
-		final float y0 = up - 3.0F;
-		final float y1 = down - 3.0F;
-		final float top = y + y0;
-		final float bottom = y + y1;
-		final float obqTop = oblique ? 1.0F - 0.25F * y0 : 0.0F;
-		final float obqBotom = oblique ? 1.0F - 0.25F * y1 : 0.0F;
+		final float y0 = y + up;
+		final float y1 = y + down;
+		final float xOffset0 = oblique ? 1.0F - 0.25F * up : 0.0F;
+		final float xOffset1 = oblique ? 1.0F - 0.25F * down : 0.0F;
 
 		if (vertexConsumer instanceof final BufferBuilderExt extBuilder
 				&& extBuilder.canvas_canSupportDirect(DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP)
@@ -73,8 +71,7 @@ public abstract class MixinBakedGlyph {
 			final int color = (int) (red * 255.0F) | ((int) (green * 255.0F) << 8) | ((int) (blue * 255.0F) << 16) | ((int) (alpha * 255.0F) << 24);
 			int i = 0;
 
-			pos.set(x0 + obqTop, top, 0.0F);
-			matrix4f.transformDirection(pos);
+			pos.set(x0 + xOffset0, y0, 0.0F).mulPosition(matrix4f);
 			quadData[i++] = Float.floatToRawIntBits(pos.x());
 			quadData[i++] = Float.floatToRawIntBits(pos.y());
 			quadData[i++] = Float.floatToRawIntBits(pos.z());
@@ -83,8 +80,7 @@ public abstract class MixinBakedGlyph {
 			quadData[i++] = Float.floatToRawIntBits(v0);
 			quadData[i++] = lightmap;
 
-			pos.set(x0 + obqBotom, bottom, 0.0F);
-			matrix4f.transformDirection(pos);
+			pos.set(x0 + xOffset1, y1, 0.0F).mulPosition(matrix4f);
 			quadData[i++] = Float.floatToRawIntBits(pos.x());
 			quadData[i++] = Float.floatToRawIntBits(pos.y());
 			quadData[i++] = Float.floatToRawIntBits(pos.z());
@@ -93,8 +89,7 @@ public abstract class MixinBakedGlyph {
 			quadData[i++] = Float.floatToRawIntBits(v1);
 			quadData[i++] = lightmap;
 
-			pos.set(x1 + obqBotom, bottom, 0.0F);
-			matrix4f.transformDirection(pos);
+			pos.set(x1 + xOffset1, y1, 0.0F).mulPosition(matrix4f);
 			quadData[i++] = Float.floatToRawIntBits(pos.x());
 			quadData[i++] = Float.floatToRawIntBits(pos.y());
 			quadData[i++] = Float.floatToRawIntBits(pos.z());
@@ -103,8 +98,7 @@ public abstract class MixinBakedGlyph {
 			quadData[i++] = Float.floatToRawIntBits(v1);
 			quadData[i++] = lightmap;
 
-			pos.set(x1 + obqTop, top, 0.0F);
-			matrix4f.transformDirection(pos);
+			pos.set(x1 + xOffset0, y0, 0.0F).mulPosition(matrix4f);
 			quadData[i++] = Float.floatToRawIntBits(pos.x());
 			quadData[i++] = Float.floatToRawIntBits(pos.y());
 			quadData[i++] = Float.floatToRawIntBits(pos.z());
@@ -116,10 +110,10 @@ public abstract class MixinBakedGlyph {
 			assert i == quadData.length;
 			extBuilder.canvas_putQuadDirect(quadData);
 		} else {
-			vertexConsumer.vertex(matrix4f, x0 + obqTop, top, 0.0F).color(red, green, blue, alpha).uv(u0, v0).uv2(lightmap).endVertex();
-			vertexConsumer.vertex(matrix4f, x0 + obqBotom, bottom, 0.0F).color(red, green, blue, alpha).uv(u0, v1).uv2(lightmap).endVertex();
-			vertexConsumer.vertex(matrix4f, x1 + obqBotom, bottom, 0.0F).color(red, green, blue, alpha).uv(u1, v1).uv2(lightmap).endVertex();
-			vertexConsumer.vertex(matrix4f, x1 + obqTop, top, 0.0F).color(red, green, blue, alpha).uv(u1, v0).uv2(lightmap).endVertex();
+			vertexConsumer.vertex(matrix4f, x0 + xOffset0, y0, 0.0F).color(red, green, blue, alpha).uv(u0, v0).uv2(lightmap).endVertex();
+			vertexConsumer.vertex(matrix4f, x0 + xOffset1, y1, 0.0F).color(red, green, blue, alpha).uv(u0, v1).uv2(lightmap).endVertex();
+			vertexConsumer.vertex(matrix4f, x1 + xOffset1, y1, 0.0F).color(red, green, blue, alpha).uv(u1, v1).uv2(lightmap).endVertex();
+			vertexConsumer.vertex(matrix4f, x1 + xOffset0, y0, 0.0F).color(red, green, blue, alpha).uv(u1, v0).uv2(lightmap).endVertex();
 		}
 	}
 }

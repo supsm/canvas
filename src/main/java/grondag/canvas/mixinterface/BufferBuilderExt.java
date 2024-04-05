@@ -25,14 +25,5 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 public interface BufferBuilderExt {
 	boolean canvas_canSupportDirect(VertexFormat expectedFormat);
-
 	void canvas_putQuadDirect(int[] data);
-
-	void canvas_enableRepeatableDraw(boolean enable);
-
-	static BufferBuilder repeatableBuffer(int size) {
-		BufferBuilder result = new BufferBuilder(size);
-		((BufferBuilderExt) result).canvas_enableRepeatableDraw(true);
-		return result;
-	}
 }
