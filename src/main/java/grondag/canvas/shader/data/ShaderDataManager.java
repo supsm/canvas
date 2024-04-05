@@ -413,10 +413,8 @@ public class ShaderDataManager {
 	/**
 	 * Called just before terrain setup each frame after camera, fog and projection
 	 * matrix are set up.
-	 * @param projectionMatrix
-	 * @param entry
 	 */
-	public static void update(Pose entry, Matrix4f projectionMatrix, Camera camera) {
+	public static void update(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Camera camera) {
 		final Minecraft client = Minecraft.getInstance();
 		final Entity cameraEntity = camera.getEntity();
 		final float tickDelta = client.getFrameTime();
@@ -454,7 +452,7 @@ public class ShaderDataManager {
 		putViewVector(VEC_CAMERA_VIEW, camera.getYRot(), camera.getXRot(), cameraVector);
 		putViewVector(VEC_ENTITY_VIEW, cameraEntity.getYRot(), cameraEntity.getXRot(), null);
 
-		MatrixData.update(entry, projectionMatrix, camera, tickDelta);
+		MatrixData.update(modelViewMatrix, projectionMatrix, camera, tickDelta);
 
 		FLOAT_VECTOR_DATA.put(VIEW_WIDTH, PipelineManager.width());
 		FLOAT_VECTOR_DATA.put(VIEW_HEIGHT, PipelineManager.height());

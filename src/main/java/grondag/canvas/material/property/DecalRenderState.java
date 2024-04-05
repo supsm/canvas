@@ -21,6 +21,7 @@
 package grondag.canvas.material.property;
 
 import com.google.common.util.concurrent.Runnables;
+import org.joml.Matrix4fStack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -61,13 +62,13 @@ public final class DecalRenderState {
 		"view_offset",
 		2,
 		() -> {
-			final PoseStack matrixStack = RenderSystem.getModelViewStack();
-			matrixStack.pushPose();
+			final Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
+			matrixStack.pushMatrix();
 			matrixStack.scale(0.99975586F, 0.99975586F, 0.99975586F);
 			RenderSystem.applyModelViewMatrix();
 		},
 		() -> {
-			RenderSystem.getModelViewStack().popPose();
+			RenderSystem.getModelViewStack().popMatrix();
 			RenderSystem.applyModelViewMatrix();
 		});
 

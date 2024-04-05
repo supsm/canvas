@@ -78,10 +78,9 @@ public class CanvasGlHelper {
 
 	private static void logMachineInfo(GLCapabilities caps) {
 		final Logger log = CanvasMod.LOG;
-		final Minecraft client = Minecraft.getInstance();
 
 		log.info("==================  CANVAS RENDERER DEBUG INFORMATION ==================");
-		log.info(String.format(" Java: %s %dbit   Canvas: %s", System.getProperty("java.version"), client.is64Bit() ? 64 : 32, CanvasMod.versionString));
+		log.info(String.format(" Java: %s         Canvas: %s", System.getProperty("java.version"), CanvasMod.versionString));
 		log.info(String.format(" CPU: %s", GLX._getCpuInfo()));
 		log.info(String.format(" LWJGL: %s", GLX._getLWJGLVersion()));
 		log.info(String.format(" OpenGL (Reported): %s", GLX.getOpenGLVersionString()));

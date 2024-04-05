@@ -36,7 +36,6 @@ public class ListWidget extends ContainerObjectSelectionList<ListItem> {
 
 	public ListWidget(int x, int y, int width, int height, boolean darkened) {
 		super(Minecraft.getInstance(), width, height, y, ITEM_HEIGHT + ITEM_SPACING);
-		setRenderBackground(false);
 		setX(x);
 		rowWidth = Math.min(300, width - 20);
 		this.darkened = darkened;

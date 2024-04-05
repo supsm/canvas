@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import grondag.canvas.render.world.WorldRenderState;
 

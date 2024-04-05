@@ -26,8 +26,6 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 
@@ -48,7 +46,7 @@ public final class MatrixData {
 		}
 	}
 
-	static void update(PoseStack.Pose view, Matrix4f projectionMatrix, Camera camera, float tickDelta) {
+	static void update(Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Camera camera, float tickDelta) {
 		// write values for prior frame before updating
 		viewMatrix.get(VIEW_LAST * 16, MATRIX_DATA);
 		projMatrix.get(PROJ_LAST * 16, MATRIX_DATA);
@@ -61,9 +59,9 @@ public final class MatrixData {
 			sanitizedOnce = true;
 		}
 
-		viewNormalMatrix.set(view.normal());
-
-		viewMatrix.set(view.pose());
+		// vanilla's modelViewMatrix is pretty much just the view matrix
+		viewNormalMatrix.set(modelViewMatrix);
+		viewMatrix.set(modelViewMatrix);
 		viewMatrix.get(VIEW * 16, MATRIX_DATA);
 		projMatrix.set(projectionMatrix);
 		projMatrix.get(PROJ * 16, MATRIX_DATA);

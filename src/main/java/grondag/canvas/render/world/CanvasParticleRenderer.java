@@ -26,7 +26,6 @@ import com.google.common.util.concurrent.Runnables;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -55,8 +54,8 @@ import grondag.canvas.render.frustum.RegionCullingFrustum;
 public class CanvasParticleRenderer {
 	private Tesselator tessellator;
 	private BufferBuilder bufferBuilder;
-	private LightTexture lightmapTextureManager;
-	private ParticleEngineExt ext;
+	private LightTexture lightmapTexture;
+	private ParticleEngineExt particleEngineExt;
 	private Runnable drawHandler = Runnables.doNothing();
 	private CanvasRenderMaterial baseMat;
 	private CanvasRenderMaterial emissiveMat;
@@ -67,22 +66,18 @@ public class CanvasParticleRenderer {
 		this.cullingFrustum = cullingFrustum;
 	}
 
-	public void renderParticles(ParticleEngine pm, PoseStack matrixStack, VertexCollectorList collectors, LightTexture lightmapTextureManager, Camera camera, float tickDelta) {
+	public void renderParticles(ParticleEngine pm, VertexCollectorList collectors, LightTexture lightmapTexture, Camera camera, float tickDelta) {
 		cullingFrustum.enableRegionCulling = false;
-		final PoseStack renderMatrix = RenderSystem.getModelViewStack();
-		renderMatrix.pushPose();
-		renderMatrix.mulPoseMatrix(matrixStack.last().pose());
-		RenderSystem.applyModelViewMatrix();
 
-		this.lightmapTextureManager = lightmapTextureManager;
+		this.lightmapTexture = lightmapTexture;
 		tessellator = Tesselator.getInstance();
 		bufferBuilder = tessellator.getBuilder();
-		ext = (ParticleEngineExt) pm;
-		final Iterator<ParticleRenderType> sheets = ext.canvas_textureSheets().iterator();
+		particleEngineExt = (ParticleEngineExt) pm;
+		final Iterator<ParticleRenderType> sheets = particleEngineExt.canvas_textureSheets().iterator();
 
 		while (sheets.hasNext()) {
 			final ParticleRenderType particleTextureSheet = sheets.next();
-			final Iterable<Particle> iterable = ext.canvas_particles().get(particleTextureSheet);
+			final Iterable<Particle> iterable = particleEngineExt.canvas_particles().get(particleTextureSheet);
 
 			if (iterable == null) {
 				continue;
@@ -122,13 +117,11 @@ public class CanvasParticleRenderer {
 			drawHandler.run();
 		}
 
-		renderMatrix.popPose();
-		RenderSystem.applyModelViewMatrix();
 		teardownVanillaParticleRender();
 	}
 
 	private void setupVanillaParticleRender() {
-		lightmapTextureManager.turnOnLightLayer();
+		lightmapTexture.turnOnLightLayer();
 		RenderSystem.enableDepthTest();
 	}
 
@@ -136,7 +129,7 @@ public class CanvasParticleRenderer {
 		RenderSystem.depthMask(true);
 		RenderSystem.depthFunc(515);
 		RenderSystem.disableBlend();
-		lightmapTextureManager.turnOffLightLayer();
+		lightmapTexture.turnOffLightLayer();
 	}
 
 	private VertexConsumer beginSheet(ParticleRenderType particleTextureSheet, VertexCollectorList collectors) {
@@ -162,7 +155,7 @@ public class CanvasParticleRenderer {
 		}
 
 		setupVanillaParticleRender();
-		particleTextureSheet.begin(bufferBuilder, ext.canvas_textureManager());
+		particleTextureSheet.begin(bufferBuilder, particleEngineExt.canvas_textureManager());
 		drawHandler = () -> particleTextureSheet.end(tessellator);
 		baseMat = null;
 		emissiveMat = null;
