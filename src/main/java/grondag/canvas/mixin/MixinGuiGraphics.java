@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -44,6 +45,7 @@ import grondag.canvas.render.world.CanvasWorldRenderer;
 public abstract class MixinGuiGraphics {
 	@Shadow @Mutable @Final private MultiBufferSource.BufferSource bufferSource;
 
+	@Unique
 	private MultiBufferSource.BufferSource itemImmediate;
 
 	@Inject(method = "Lnet/minecraft/client/gui/GuiGraphics;<init>(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V", at = @At("TAIL"))

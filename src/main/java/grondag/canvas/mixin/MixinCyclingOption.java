@@ -20,6 +20,8 @@
 
 package grondag.canvas.mixin;
 
+import java.util.function.Consumer;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,8 +36,8 @@ import grondag.canvas.varia.CanvasButtonWidget;
 
 @Mixin(OptionInstance.class)
 public abstract class MixinCyclingOption {
-	@Inject(at = @At("HEAD"), method = "createButton", cancellable = true)
-	private void onCreateButton(Options options, int x, int y, int width, CallbackInfoReturnable<AbstractWidget> info) {
+	@Inject(at = @At("HEAD"), method = "Lnet/minecraft/client/OptionInstance;createButton(Lnet/minecraft/client/Options;IIILjava/util/function/Consumer;)Lnet/minecraft/client/gui/components/AbstractWidget;", cancellable = true)
+	private void onCreateButton(Options options, int x, int y, int width, Consumer consumer, CallbackInfoReturnable<AbstractWidget> info) {
 		final OptionInstance<?> self = (OptionInstance<?>) (Object) this;
 
 		if (self == options.graphicsMode()) {

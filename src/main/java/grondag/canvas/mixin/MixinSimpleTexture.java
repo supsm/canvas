@@ -38,9 +38,7 @@ import grondag.canvas.varia.GFX;
 
 @Mixin(SimpleTexture.class)
 public abstract class MixinSimpleTexture extends AbstractTexture {
-	@Shadow
-	@Final
-	protected ResourceLocation location;
+	@Final @Shadow protected ResourceLocation location;
 
 	@Inject(method = "doLoad", at = @At("TAIL"))
 	private void onUpload(NativeImage nativeImage, boolean bl, boolean bl2, CallbackInfo ci) {

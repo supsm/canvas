@@ -23,10 +23,10 @@ package grondag.canvas.mixin;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -39,18 +39,19 @@ import grondag.canvas.mixinterface.SpriteContentsExt;
 
 @Mixin(SpriteContents.Ticker.class)
 public class MixinAnimatedTextureTicker implements AnimatedTextureTickerExt {
-	@Shadow(aliases = {"this$0", "a", "field_40543"})
-	@Dynamic
-	private SpriteContents parent;
-	@Shadow
-	int frame;
+	@Shadow int frame;
 	@Shadow int subFrame;
 
 	@Nullable
-	@Shadow @Final
-	private SpriteContents.InterpolationData interpolationData;
+	@Shadow @Final private SpriteContents.InterpolationData interpolationData;
+	@Shadow @Final SpriteContents.AnimatedTexture animationInfo;
 
-	@Shadow @Final private SpriteContents.AnimatedTexture animationInfo;
+	@Unique private SpriteContents parent;
+
+	@Inject(method = "<init>", at = @At("TAIL"))
+	private void getParent(SpriteContents spriteContents, SpriteContents.AnimatedTexture animatedTexture, SpriteContents.InterpolationData interpolationData, CallbackInfo ci) {
+		parent = spriteContents;
+	}
 
 	@Override
 	public int canvas_frameIndex() {

@@ -25,8 +25,10 @@ import java.nio.file.Path;
 import java.util.BitSet;
 import java.util.function.BooleanSupplier;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -53,10 +55,13 @@ import grondag.canvas.render.world.CanvasWorldRenderer;
 
 @Mixin(TextureAtlas.class)
 public abstract class MixinTextureAtlas extends AbstractTexture implements TextureAtlasExt {
-	@Shadow private ResourceLocation location;
+	@Final @Shadow private ResourceLocation location;
+	@Unique
 	private int width, height;
 
+	@Unique
 	private final BitSet animationBits = new BitSet();
+	@Unique
 	private final BitSet perFrameBits = new BitSet();
 
 	@Inject(at = @At("HEAD"), method = "upload")

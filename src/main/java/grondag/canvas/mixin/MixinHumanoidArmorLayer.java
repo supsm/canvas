@@ -21,6 +21,7 @@
 package grondag.canvas.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -42,6 +43,7 @@ import grondag.canvas.buffer.input.CanvasImmediate;
 
 @Mixin(HumanoidArmorLayer.class)
 public class MixinHumanoidArmorLayer {
+	@Unique
 	private boolean canvas_hasFoil = false;
 
 	@Inject(method = "renderArmorPiece", at = @At("HEAD"))

@@ -55,7 +55,7 @@ public abstract class MixinGameRenderer implements GameRendererExt {
 	@Shadow protected abstract void bobView(PoseStack matrixStack, float f);
 	@Shadow @Final Minecraft minecraft;
 
-	@Inject(method = "renderLevel", require = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemInHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/Camera;F)V", shift = At.Shift.AFTER))
+	@Inject(method = "renderLevel", require = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemInHand(Lnet/minecraft/client/Camera;FLorg/joml/Matrix4f;)V", shift = At.Shift.AFTER))
 	private void afterRenderHand(CallbackInfo ci) {
 		ScreenRenderState.setRenderingHand(false);
 		PipelineManager.afterRenderHand();

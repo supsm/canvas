@@ -21,6 +21,7 @@
 package grondag.canvas.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -41,6 +42,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
  */
 @Mixin(TropicalFishModelA.class)
 public class MixinTropicalFishModelA {
+	@Unique
 	private static CubeDeformation _cubeDeformation;
 
 	@Inject(method = "createBodyLayer(Lnet/minecraft/client/model/geom/builders/CubeDeformation;)Lnet/minecraft/client/model/geom/builders/LayerDefinition;", at = @At(value = "HEAD"))

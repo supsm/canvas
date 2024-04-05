@@ -21,6 +21,7 @@
 package grondag.canvas.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
 import net.minecraft.client.particle.Particle;
 import net.minecraft.core.particles.ParticleType;
@@ -29,6 +30,7 @@ import grondag.canvas.mixinterface.ParticleExt;
 
 @Mixin(Particle.class)
 public class MixinParticle implements ParticleExt {
+	@Unique
 	private ParticleType<?> canvas_particleType;
 
 	@Override

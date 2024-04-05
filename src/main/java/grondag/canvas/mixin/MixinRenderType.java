@@ -22,6 +22,7 @@ package grondag.canvas.mixin;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
 import net.minecraft.client.renderer.RenderType;
 
@@ -32,6 +33,7 @@ import grondag.canvas.mixinterface.RenderTypeExt;
 
 @Mixin(RenderType.class)
 abstract class MixinRenderType implements RenderTypeExt {
+	@Unique
 	private @Nullable CanvasRenderMaterial materialState;
 
 	@Override

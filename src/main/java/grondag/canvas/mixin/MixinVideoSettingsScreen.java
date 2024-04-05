@@ -43,14 +43,8 @@ public class MixinVideoSettingsScreen extends Screen {
 		CanvasButtonWidget.parent = this;
 	}
 
-	@Inject(at = @At("HEAD"), method = "method_19865")
-	void onClosing(CallbackInfo ci) {
+	@Inject(at = @At("HEAD"), method = "Lnet/minecraft/client/gui/screens/VideoSettingsScreen;onClose()V")
+	public void beforeClose(CallbackInfo ci) {
 		AccessibilityData.onCloseOptionScreen();
-	}
-
-	@Override
-	public void onClose() {
-		AccessibilityData.onCloseOptionScreen();
-		super.onClose();
 	}
 }

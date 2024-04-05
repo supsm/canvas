@@ -35,13 +35,13 @@ import grondag.canvas.pipeline.BufferDebug;
 
 @Mixin(Gui.class)
 public class MixinGui {
-	@Inject(method = "render", at = @At("RETURN"), cancellable = false, require = 1)
+	@Inject(method = "render", at = @At("RETURN"), require = 1)
 	private void afterRender(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
 		BufferDebug.renderOverlay(guiGraphics, ((Gui) (Object) this).getFont());
 		Timekeeper.renderOverlay(guiGraphics, ((Gui) (Object) this).getFont());
 	}
 
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z"))
+	@Redirect(method = "renderCameraOverlays", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useFancyGraphics()Z"))
 	private boolean controlVignette() {
 		return !Configurator.disableVignette;
 	}

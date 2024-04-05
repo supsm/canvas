@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,9 +42,9 @@ import grondag.canvas.mixinterface.ParticleExt;
 
 @Mixin(ParticleEngine.class)
 public class MixinParticleEngine implements ParticleEngineExt {
-	@Shadow private static List<ParticleRenderType> RENDER_ORDER;
-	@Shadow private Map<ParticleRenderType, Queue<Particle>> particles;
-	@Shadow private TextureManager textureManager;
+	@Final @Shadow private static List<ParticleRenderType> RENDER_ORDER;
+	@Final @Shadow private Map<ParticleRenderType, Queue<Particle>> particles;
+	@Final @Shadow private TextureManager textureManager;
 
 	@Override
 	public List<ParticleRenderType> canvas_textureSheets() {

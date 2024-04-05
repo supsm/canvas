@@ -29,7 +29,8 @@ import grondag.canvas.mixinterface.RenderTargetExt;
 
 @Mixin(RenderTarget.class)
 public abstract class MixinRenderTarget implements RenderTargetExt {
-	@Shadow private int colorTextureId;
+	@Shadow
+	public int colorTextureId;
 
 	@Override
 	public int canvas_colorAttachment() {
