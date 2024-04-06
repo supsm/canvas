@@ -34,9 +34,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 
 import grondag.canvas.buffer.input.CanvasImmediate;
 import grondag.canvas.mixinterface.LevelRendererExt;
@@ -48,6 +45,7 @@ public abstract class MixinGuiGraphics {
 	@Shadow @Final private PoseStack pose;
 
 	@Unique private MultiBufferSource.BufferSource vanillaBufferSource;
+	@Unique private boolean vanillaInvoked = false;
 
 	@Inject(method = "<init>(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V", at = @At("RETURN"))
 	private void afterNew(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, CallbackInfo ci) {
@@ -65,6 +63,7 @@ public abstract class MixinGuiGraphics {
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;drawInBatch(Ljava/lang/String;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;IIZ)I"),
 			index = 6)
 	private MultiBufferSource onDrawStringA(MultiBufferSource multiBufferSource) {
+		vanillaInvoked = true;
 		return vanillaBufferSource;
 	}
 
@@ -73,6 +72,7 @@ public abstract class MixinGuiGraphics {
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;drawInBatch(Lnet/minecraft/util/FormattedCharSequence;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)I"),
 			index = 6)
 	private MultiBufferSource onDrawStringB(MultiBufferSource multiBufferSource) {
+		vanillaInvoked = true;
 		return vanillaBufferSource;
 	}
 
@@ -81,19 +81,15 @@ public abstract class MixinGuiGraphics {
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent;renderText(Lnet/minecraft/client/gui/Font;IILorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"),
 			index = 4)
 	private MultiBufferSource.BufferSource onRenderTooltipText(MultiBufferSource.BufferSource bufferSource) {
+		vanillaInvoked = true;
 		return vanillaBufferSource;
 	}
 
 	@Inject(method = "flush", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
 	private void onEndBatch(CallbackInfo ci) {
-		vanillaBufferSource.endBatch();
-	}
-
-	@Inject(
-			method = "renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;IIII)V",
-			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V"))
-	void onScaleItem(LivingEntity livingEntity, Level level, ItemStack itemStack, int i, int j, int k, int l, CallbackInfo ci) {
-		// Flip normal Y. This is a lighting "fix" very specific to Canvas since 1.20.5
-		pose.last().normal().scale(1.0f, -1.0f, 1.0f);
+		if (vanillaInvoked) {
+			vanillaInvoked = false;
+			vanillaBufferSource.endBatch();
+		}
 	}
 }

@@ -22,12 +22,17 @@ package grondag.canvas.apiimpl.rendercontext;
 
 import java.util.function.Supplier;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AbstractBannerBlock;
 
 import io.vram.frex.base.renderer.context.render.ItemRenderContext;
@@ -72,6 +77,16 @@ public class CanvasItemRenderContext extends ItemRenderContext {
 	protected void prepareEncoding(MultiBufferSource vertexConsumers) {
 		defaultConsumer = vertexConsumers.getBuffer(inputContext.defaultRenderType());
 		encoder.collectors = vertexConsumers instanceof CanvasImmediate ? ((CanvasImmediate) vertexConsumers).collectors : null;
+	}
+
+	@Override
+	public void renderItem(ItemModelShaper models, ItemStack stack, ItemDisplayContext renderMode, boolean isLeftHand, PoseStack poseStack, MultiBufferSource vertexConsumers, int light, int overlay, BakedModel model) {
+		if (renderMode == ItemDisplayContext.GUI && (!model.isCustomRenderer() || stack.getItem() instanceof BlockItem)) {
+			// GUI Item shading hack
+			poseStack.last().normal().scale(1.0f, -1.0f, 1.0f);
+		}
+
+		super.renderItem(models, stack, renderMode, isLeftHand, poseStack, vertexConsumers, light, overlay, model);
 	}
 
 	@Override
