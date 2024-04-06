@@ -47,8 +47,7 @@ import grondag.canvas.render.world.CanvasWorldRenderer;
 public abstract class MixinGuiGraphics {
 	@Shadow @Final private PoseStack pose;
 
-	@Unique
-	private MultiBufferSource.BufferSource vanillaBufferSource;
+	@Unique private MultiBufferSource.BufferSource vanillaBufferSource;
 
 	@Inject(method = "<init>(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V", at = @At("RETURN"))
 	private void afterNew(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, CallbackInfo ci) {
