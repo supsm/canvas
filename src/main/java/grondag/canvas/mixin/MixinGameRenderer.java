@@ -42,7 +42,7 @@ import grondag.canvas.perf.Timekeeper;
 import grondag.canvas.pipeline.BufferDebug;
 import grondag.canvas.pipeline.PipelineManager;
 import grondag.canvas.render.world.CanvasWorldRenderer;
-import grondag.canvas.shader.data.ScreenRenderState;
+import grondag.canvas.shader.data.ContextFlagState;
 
 @Mixin(GameRenderer.class)
 public abstract class MixinGameRenderer implements GameRendererExt {
@@ -57,7 +57,7 @@ public abstract class MixinGameRenderer implements GameRendererExt {
 
 	@Inject(method = "renderLevel", require = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemInHand(Lnet/minecraft/client/Camera;FLorg/joml/Matrix4f;)V", shift = At.Shift.AFTER))
 	private void afterRenderHand(CallbackInfo ci) {
-		ScreenRenderState.setRenderingHand(false);
+		ContextFlagState.setRenderingHand(false);
 		PipelineManager.afterRenderHand();
 
 		if (Configurator.enableBufferDebug) {

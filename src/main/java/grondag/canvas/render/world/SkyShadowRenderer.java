@@ -27,6 +27,7 @@ import net.minecraft.client.Minecraft;
 import grondag.canvas.buffer.util.DrawableStream;
 import grondag.canvas.pipeline.Pipeline;
 import grondag.canvas.pipeline.PipelineManager;
+import grondag.canvas.shader.data.ContextFlagState;
 import grondag.canvas.shader.data.ShadowMatrixData;
 import grondag.canvas.varia.GFX;
 
@@ -80,8 +81,12 @@ public class SkyShadowRenderer {
 		canvasWorldRenderer.worldRenderState.renderShadowLayer(cascade);
 
 		if (Pipeline.config().skyShadow.allowEntities && Minecraft.getInstance().options.entityShadows().get()) {
+			ContextFlagState.setRenderingEntity(true);
+
 			entityBuffer.draw(true);
 			shadowExtrasBuffer.draw(true);
+
+			ContextFlagState.setRenderingEntity(false);
 		}
 	}
 

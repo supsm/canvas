@@ -39,6 +39,7 @@ import grondag.canvas.buffer.input.CanvasImmediate;
 import grondag.canvas.mixinterface.LevelRendererExt;
 import grondag.canvas.mixinterface.RenderBuffersExt;
 import grondag.canvas.render.world.CanvasWorldRenderer;
+import grondag.canvas.shader.data.ContextFlagState;
 
 @Mixin(GuiGraphics.class)
 public abstract class MixinGuiGraphics {
@@ -85,11 +86,18 @@ public abstract class MixinGuiGraphics {
 		return vanillaBufferSource;
 	}
 
-	@Inject(method = "flush", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
-	private void onEndBatch(CallbackInfo ci) {
+	@Inject(
+			method = "flush",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V",
+					shift = At.Shift.AFTER))
+	private void afterEndBatch(CallbackInfo ci) {
 		if (vanillaInvoked) {
 			vanillaInvoked = false;
 			vanillaBufferSource.endBatch();
 		}
+
+		ContextFlagState.setRenderingEntityInGui(false);
 	}
 }

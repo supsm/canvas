@@ -18,33 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package grondag.canvas.shader.data;
+package grondag.canvas.mixin;
 
-/**
- * Describes general rendering state that encompasses hand and GUI rendering.
- */
-public class ScreenRenderState {
-	private static boolean renderingHand = false;
-	private static boolean stateChanged = true;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-	public static void clearStateChange() {
-		stateChanged = false;
-	}
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
 
-	public static void setRenderingHand(boolean isRenderingHand) {
-		renderingHand = isRenderingHand;
-		setStateChanged();
-	}
+import grondag.canvas.shader.data.ContextFlagState;
 
-	public static boolean renderingHand() {
-		return renderingHand;
-	}
-
-	public static boolean stateChanged() {
-		return stateChanged;
-	}
-
-	private static void setStateChanged() {
-		stateChanged = true;
+@Mixin(EnchantmentScreen.class)
+public class MixinEnchantmentScreen {
+	@Inject(
+			method = "renderBook",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/BookModel;renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IIFFFF)V"))
+	private void beforeRenderBook(GuiGraphics guiGraphics, int i, int j, float f, CallbackInfo ci) {
+		ContextFlagState.setRenderingEntityInGui(true);
 	}
 }
