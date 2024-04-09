@@ -12,6 +12,7 @@
 #define _CV_CONTEXT_FLAGS 3
 
 #define _CV_CONTEXT_FLAG_HAND 0
+#define _CV_CONTEXT_FLAG_ENTITY 1
 
 uniform int[4] _cvu_context;
 

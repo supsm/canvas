@@ -35,7 +35,7 @@ import io.vram.frex.api.texture.SpriteIndex;
 import grondag.canvas.buffer.format.CanvasVertexFormat;
 import grondag.canvas.pipeline.Pipeline;
 import grondag.canvas.shader.data.MatrixState;
-import grondag.canvas.shader.data.ScreenRenderState;
+import grondag.canvas.shader.data.ContextFlagState;
 import grondag.canvas.shader.data.ShaderDataManager;
 import grondag.canvas.shader.data.UniformRefreshFrequency;
 import grondag.canvas.texture.TextureData;
@@ -53,6 +53,7 @@ public class GlMaterialProgram extends GlProgram {
 	private static final FloatBuffer MODEL_ORIGIN = BufferUtils.createFloatBuffer(8);
 	private static final BitPacker32<Void> CONTEXT_FLAGS = new BitPacker32<>(null, null);
 	private static final BitPacker32<Void>.BooleanElement CONTEXT_FLAG_HAND = CONTEXT_FLAGS.createBooleanElement();
+	private static final BitPacker32<Void>.BooleanElement CONTEXT_FLAG_ENTITY = CONTEXT_FLAGS.createBooleanElement();
 
 	GlMaterialProgram(Shader vertexShader, Shader fragmentShader, CanvasVertexFormat format, ProgramType programType) {
 		super(programType.isTerrain ? "material_terrain" : "material", vertexShader, fragmentShader, format, programType);
@@ -141,12 +142,12 @@ public class GlMaterialProgram extends GlProgram {
 
 		// updates once for hand, unlimited amount of times for GUI render because GUI transform is baked into view matrix.
 		// NB: unreachable in depth pass
-		if (ms == MatrixState.SCREEN && (ScreenRenderState.stateChanged() || !ScreenRenderState.renderingHand())) {
+		if (ms == MatrixState.SCREEN && (ContextFlagState.needUploadGuiMatrix() || !ContextFlagState.renderingHand())) {
 			guiMatrix.set(RenderSystem.getProjectionMatrix());
 			guiMatrix.mul(RenderSystem.getModelViewMatrix());
 			guiViewProjMatrix.set(guiMatrix);
 			guiViewProjMatrix.upload();
-			ScreenRenderState.clearStateChange();
+			ContextFlagState.markGuiMatrixUploaded();
 		}
 
 		if (atlasInfo == null) {
@@ -158,7 +159,8 @@ public class GlMaterialProgram extends GlProgram {
 		}
 
 		contextInfoData[_CV_MATERIAL_TARGET] = targetIndex;
-		contextInfoData[_CV_CONTEXT_FLAGS] = CONTEXT_FLAG_HAND.setValue(ScreenRenderState.renderingHand(), contextInfoData[_CV_CONTEXT_FLAGS]);
+		contextInfoData[_CV_CONTEXT_FLAGS] = CONTEXT_FLAG_HAND.setValue(ContextFlagState.renderingHand(), contextInfoData[_CV_CONTEXT_FLAGS]);
+		contextInfoData[_CV_CONTEXT_FLAGS] = CONTEXT_FLAG_ENTITY.setValue(ContextFlagState.renderingEntityAny(targetIndex), contextInfoData[_CV_CONTEXT_FLAGS]);
 
 		contextInfo.set(contextInfoData);
 		contextInfo.upload();

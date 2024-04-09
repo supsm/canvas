@@ -114,7 +114,7 @@ import grondag.canvas.shader.GlProgramManager;
 import grondag.canvas.shader.data.IntData;
 import grondag.canvas.shader.data.MatrixData;
 import grondag.canvas.shader.data.MatrixState;
-import grondag.canvas.shader.data.ScreenRenderState;
+import grondag.canvas.shader.data.ContextFlagState;
 import grondag.canvas.shader.data.ShaderDataManager;
 import grondag.canvas.terrain.occlusion.SortableVisibleRegionList;
 import grondag.canvas.terrain.occlusion.TerrainIterator;
@@ -418,6 +418,7 @@ public class CanvasWorldRenderer extends LevelRenderer {
 		entityCullingFrustum.enableRegionCulling = Configurator.cullEntityRender;
 
 		CanvasImmediate.protectBuffers(immediate, materialExtrasImmediate, shadowExtrasImmediate);
+		ContextFlagState.setRenderingEntity(true);
 
 		while (entities.hasNext()) {
 			final Entity entity = entities.next();
@@ -558,6 +559,7 @@ public class CanvasWorldRenderer extends LevelRenderer {
 			}
 		}
 
+		ContextFlagState.setRenderingEntity(false);
 		contextState.clear();
 
 		RenderState.disable();
@@ -575,12 +577,16 @@ public class CanvasWorldRenderer extends LevelRenderer {
 			WorldRenderDraws.profileSwap(profiler, ProfilerGroup.EndWorld, "terrain_solid");
 			worldRenderState.renderSolidTerrain();
 
+			ContextFlagState.setRenderingEntity(true);
+
 			WorldRenderDraws.profileSwap(profiler, ProfilerGroup.EndWorld, "entity_draw_solid");
 			entityBuffer.draw(false);
 			entityBuffer.close();
 
 			materialExtrasBuffer.draw(false);
 			materialExtrasBuffer.close();
+
+			ContextFlagState.setRenderingEntity(false);
 		}
 
 		// Nothing prevents entities from buffering quads that don't get drawn in shadow and they will
@@ -884,7 +890,7 @@ public class CanvasWorldRenderer extends LevelRenderer {
 
 		RenderSystem.applyModelViewMatrix();
 		MatrixState.set(MatrixState.SCREEN);
-		ScreenRenderState.setRenderingHand(true);
+		ContextFlagState.setRenderingHand(true);
 		BufferSynchronizer.checkPoint();
 	}
 
