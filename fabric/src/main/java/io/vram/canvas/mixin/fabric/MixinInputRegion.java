@@ -22,10 +22,10 @@ package io.vram.canvas.mixin.fabric;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
+import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
 
 import grondag.canvas.terrain.region.input.InputRegion;
 
 /** Attached Fabric API interface to our render regions when needed for compat. */
 @Mixin(InputRegion.class)
-public abstract class MixinInputRegion implements RenderAttachedBlockView { }
+public class MixinInputRegion implements FabricBlockView { }

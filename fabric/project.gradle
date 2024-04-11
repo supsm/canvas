@@ -13,7 +13,7 @@ dependencies {
 	modIncludeImplementation(fabricApi.module("fabric-resource-loader-v0", project.fabric_version))
 	modIncludeImplementation(fabricApi.module("fabric-key-binding-api-v1", project.fabric_version))
 
-	modCompileOnly(fabricApi.module("fabric-rendering-data-attachment-v1", project.fabric_version))
+	modCompileOnly(fabricApi.module("fabric-block-view-api-v2", project.fabric_version))
 	modCompileOnly(fabricApi.module("fabric-rendering-v1", project.fabric_version))
 
 	modIncludeImplementation "org.anarres:jcpp:1.4.14"
@@ -27,8 +27,8 @@ dependencies {
 	modIncludeImplementation("io.vram:frex-fabric:20.1.347")
 	modIncludeImplementation("io.vram:jmx-fabric:20.1.284")
 
-	modCompileOnly "com.terraformersmc:modmenu:7.2.2-beta.2"
-	modRuntimeOnly "com.terraformersmc:modmenu:7.2.2-beta.2"
+	modCompileOnly "com.terraformersmc:modmenu:7.2.2"
+	modRuntimeOnly "com.terraformersmc:modmenu:7.2.2"
 }
 
 sourceSets {
