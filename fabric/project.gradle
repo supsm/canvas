@@ -24,11 +24,11 @@ dependencies {
 
 	modIncludeImplementation("io.vram:bitkit:1.0.4")
 	modIncludeImplementation("io.vram:special-circumstances:1.10.7")
-	modIncludeImplementation("io.vram:frex-fabric:20.0.341")
-	modIncludeImplementation("io.vram:jmx-fabric:20.0.281")
+	modIncludeImplementation("io.vram:frex-fabric:20.1.347")
+	modIncludeImplementation("io.vram:jmx-fabric:20.1.284")
 
-	modCompileOnly "com.terraformersmc:modmenu:7.0.0-beta.2"
-	modRuntimeOnly "com.terraformersmc:modmenu:7.0.0-beta.2"
+	modCompileOnly "com.terraformersmc:modmenu:7.2.2-beta.2"
+	modRuntimeOnly "com.terraformersmc:modmenu:7.2.2-beta.2"
 }
 
 sourceSets {
