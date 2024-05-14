@@ -76,6 +76,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LightLayer;
@@ -432,10 +433,8 @@ public class InputRegion extends AbstractInputRegion implements BlockAndTintGett
 		return ChunkColorCache.get(getChunk(x >> 4, z >> 4)).getColor(x, blockPos.getY(), z, colorResolver);
 	}
 
-	public Biome getBiome(BlockPos blockPos) {
-		final int x = blockPos.getX();
-		final int z = blockPos.getZ();
-		return ChunkColorCache.get(getChunk(x >> 4, z >> 4)).getBiome(x, blockPos.getY(), z);
+	public Holder<Biome> getBiome(BlockPos blockPos) {
+		return world.getBiomeManager().getBiome(blockPos);
 	}
 
 	/**

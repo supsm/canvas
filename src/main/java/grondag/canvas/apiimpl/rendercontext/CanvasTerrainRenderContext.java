@@ -109,7 +109,7 @@ public class CanvasTerrainRenderContext extends BlockRenderContext<BlockAndTintG
 
 		@Override
 		public Biome getBiome(BlockPos pos) {
-			return region.getBiome(pos);
+			return region.getBiome(pos).value();
 		}
 
 		@Override
