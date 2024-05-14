@@ -18,6 +18,12 @@ const vec3 LIGHT1      = vec3 ( 0.104196384,  0.947239857, -0.303116754);
 const vec3 LIGHT2      = vec3 (-0.104196384,  0.947239857,  0.303116754);
 const vec3 LIGHT2_DARK = vec3 (-0.104196384, -0.947239857,  0.303116754);
 
+const vec3 LIGHT1_GUI  = vec3 (-0.9334392 , 0.26269472, -0.24430016);
+const vec3 LIGHT2_GUI  = vec3 (-0.10357137, 0.9766068 ,  0.18844642);
+
+const vec3 LIGHT1_GUI_ENTITY = vec3 (0.140028   , -0.70014  , 0.70014);
+const vec3 LIGHT2_GUI_ENTITY = vec3 (-0.19611613, -0.9805807, 0.0    );
+
 /**
  * Formula mimics vanilla lighting for plane-aligned quads and is vaguely
  * consistent with Phong lighting ambient + diffuse for others.
@@ -43,10 +49,12 @@ float p_diffuseSky(vec3 normal) {
  * Offers results similar to vanilla in GUI, assumes a fixed transform.
  */
 float p_diffuseGui(vec3 normal) {
+	vec3 light1 = mix(LIGHT1_GUI, LIGHT1_GUI_ENTITY, float(frx_isEntity));
+	vec3 light2 = mix(LIGHT2_GUI, LIGHT2_GUI_ENTITY, float(frx_isEntity));
+
 	normal = normalize(normal);
-	float light = 0.4
-	+ 0.6 * clamp(dot(normal.xyz, vec3(-0.93205774, 0.26230583, -0.24393857)), 0.0, 1.0)
-	+ 0.6 * clamp(dot(normal.xyz, vec3(-0.10341814, 0.9751613, 0.18816751)), 0.0, 1.0);
+
+	float light = 0.4 + 0.6 * clamp(dot(normal.xyz, light1), 0.0, 1.0) + 0.6 * clamp(dot(normal.xyz, light2), 0.0, 1.0);
 	return min(light, 1.0);
 }
 

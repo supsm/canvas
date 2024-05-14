@@ -18,14 +18,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.vram.canvas.mixin.fabric;
+package grondag.canvas.mixin;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.world.entity.LivingEntity;
 
-import grondag.canvas.terrain.region.input.InputRegion;
+import grondag.canvas.shader.data.ContextFlagState;
 
-/** Attached Fabric API interface to our render regions when needed for compat. */
-@Mixin(InputRegion.class)
-public class MixinInputRegion implements FabricBlockView { }
+@Mixin(InventoryScreen.class)
+public class MixinInventoryScreen {
+	@Inject(
+			method = "renderEntityInInventory",
+			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;runAsFancy(Ljava/lang/Runnable;)V"))
+	private static void beforeRenderEntity(GuiGraphics guiGraphics, int i, int j, int k, Quaternionf quaternionf, Quaternionf quaternionf2, LivingEntity livingEntity, CallbackInfo ci) {
+		ContextFlagState.setRenderingEntityInGui(true);
+	}
+}
