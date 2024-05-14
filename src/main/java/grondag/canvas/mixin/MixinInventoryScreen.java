@@ -38,7 +38,7 @@ public class MixinInventoryScreen {
 	@Inject(
 			method = "renderEntityInInventory",
 			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;runAsFancy(Ljava/lang/Runnable;)V"))
-	private static void beforeRenderEntity(GuiGraphics guiGraphics, int i, int j, int k, Quaternionf quaternionf, Quaternionf quaternionf2, LivingEntity livingEntity, CallbackInfo ci) {
+	private static void beforeRenderEntity(GuiGraphics guiGraphics, float f, float g, int i, Vector3f vector3f, Quaternionf quaternionf, Quaternionf quaternionf2, LivingEntity livingEntity, CallbackInfo ci) {
 		ContextFlagState.setRenderingEntityInGui(true);
 	}
 }
