@@ -21,6 +21,12 @@
 package io.vram.canvas.mixin.fabric;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 
 import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
 
@@ -28,4 +34,17 @@ import grondag.canvas.terrain.region.input.InputRegion;
 
 /** Attached Fabric API interface to our render regions when needed for compat. */
 @Mixin(InputRegion.class)
-public class MixinInputRegion implements FabricBlockView { }
+public class MixinInputRegion implements FabricBlockView {
+	@Shadow
+	protected Level world;
+
+	@Override
+	public boolean hasBiomes() {
+		return true;
+	}
+
+	@Override
+	public Holder<Biome> getBiomeFabric(BlockPos pos) {
+		return world.getBiome(pos);
+	}
+}
