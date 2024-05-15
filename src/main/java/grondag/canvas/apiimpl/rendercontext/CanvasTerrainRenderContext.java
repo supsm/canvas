@@ -104,7 +104,7 @@ public class CanvasTerrainRenderContext extends BlockRenderContext<BlockAndTintG
 
 		@Override
 		public @Nullable Object blockEntityRenderData(BlockPos pos) {
-			return region.getBlockEntityRenderAttachment(pos);
+			return region.getBlockEntityRenderData(pos);
 		}
 
 		@Override

@@ -356,8 +356,8 @@ public class InputRegion extends AbstractInputRegion implements BlockAndTintGett
 		return world.getBrightness(type, pos);
 	}
 
-	// Implements Fabrics API RenderAttachedBlockView
-	public Object getBlockEntityRenderAttachment(BlockPos pos) {
+	// Implements Fabrics API FabricBlockView
+	public Object getBlockEntityRenderData(BlockPos pos) {
 		return isInMainChunk(pos) ? renderData[interiorIndex(pos)] : null;
 	}
 
