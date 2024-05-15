@@ -15,6 +15,7 @@
 #define frx_modelOriginRegion (_cvu_model_origin_type == 1)
 #define frx_modelOriginScreen (_cvu_model_origin_type == 2)
 #define frx_isHand (((_cvu_context[_CV_CONTEXT_FLAGS] >> _CV_CONTEXT_FLAG_HAND) & 1) == 1)
+#define frx_isEntity (((_cvu_context[_CV_CONTEXT_FLAGS] >> _CV_CONTEXT_FLAG_ENTITY) & 1) == 1)
 #define frx_isGui frx_modelOriginScreen
 #define frx_guiViewProjectionMatrix _cvu_guiViewProjMatrix
 #define frx_normalModelMatrix _cvu_normal_model_matrix

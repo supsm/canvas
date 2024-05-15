@@ -37,10 +37,12 @@ import grondag.canvas.buffer.input.CanvasImmediate;
 import grondag.canvas.mixinterface.LevelRendererExt;
 import grondag.canvas.mixinterface.RenderBuffersExt;
 import grondag.canvas.render.world.CanvasWorldRenderer;
+import grondag.canvas.shader.data.ContextFlagState;
 
 @Mixin(GuiGraphics.class)
 public abstract class MixinGuiGraphics {
 	@Unique private MultiBufferSource.BufferSource vanillaBufferSource;
+	@Unique private boolean vanillaInvoked = false;
 
 	@Inject(method = "<init>(Lnet/minecraft/client/Minecraft;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V", at = @At("RETURN"))
 	private void afterNew(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, CallbackInfo ci) {
@@ -58,6 +60,7 @@ public abstract class MixinGuiGraphics {
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;drawInBatch(Ljava/lang/String;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;IIZ)I"),
 			index = 6)
 	private MultiBufferSource onDrawStringA(MultiBufferSource multiBufferSource) {
+		vanillaInvoked = true;
 		return vanillaBufferSource;
 	}
 
@@ -66,6 +69,7 @@ public abstract class MixinGuiGraphics {
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;drawInBatch(Lnet/minecraft/util/FormattedCharSequence;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)I"),
 			index = 6)
 	private MultiBufferSource onDrawStringB(MultiBufferSource multiBufferSource) {
+		vanillaInvoked = true;
 		return vanillaBufferSource;
 	}
 
@@ -74,11 +78,22 @@ public abstract class MixinGuiGraphics {
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent;renderText(Lnet/minecraft/client/gui/Font;IILorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;)V"),
 			index = 4)
 	private MultiBufferSource.BufferSource onRenderTooltipText(MultiBufferSource.BufferSource bufferSource) {
+		vanillaInvoked = true;
 		return vanillaBufferSource;
 	}
 
-	@Inject(method = "flush", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V"))
-	private void onEndBatch(CallbackInfo ci) {
-		vanillaBufferSource.endBatch();
+	@Inject(
+			method = "flush",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;endBatch()V",
+					shift = At.Shift.AFTER))
+	private void afterEndBatch(CallbackInfo ci) {
+		if (vanillaInvoked) {
+			vanillaInvoked = false;
+			vanillaBufferSource.endBatch();
+		}
+
+		ContextFlagState.setRenderingEntityInGui(false);
 	}
 }

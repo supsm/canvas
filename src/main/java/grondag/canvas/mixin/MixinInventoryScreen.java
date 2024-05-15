@@ -18,28 +18,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.vram.canvas.mixin.fabric;
+package grondag.canvas.mixin;
 
+import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.world.entity.LivingEntity;
 
-import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
+import grondag.canvas.shader.data.ContextFlagState;
 
-import grondag.canvas.terrain.region.input.InputRegion;
-
-/** Attached Fabric API interface to our render regions when needed for compat. */
-@Mixin(InputRegion.class)
-public class MixinInputRegion implements FabricBlockView {
-	@Override
-	public boolean hasBiomes() {
-		return true;
-	}
-
-	@Override
-	public Holder<Biome> getBiomeFabric(BlockPos pos) {
-		return ((InputRegion) (Object) this).getBiome(pos);
+@Mixin(InventoryScreen.class)
+public class MixinInventoryScreen {
+	@Inject(
+			method = "renderEntityInInventory",
+			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;runAsFancy(Ljava/lang/Runnable;)V"))
+	private static void beforeRenderEntity(GuiGraphics guiGraphics, float f, float g, int i, Vector3f vector3f, Quaternionf quaternionf, Quaternionf quaternionf2, LivingEntity livingEntity, CallbackInfo ci) {
+		ContextFlagState.setRenderingEntityInGui(true);
 	}
 }
