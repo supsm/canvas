@@ -27,25 +27,38 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
 
+import grondag.canvas.CanvasMod;
 import grondag.canvas.buffer.input.CanvasImmediate;
+import grondag.canvas.config.Configurator;
 import grondag.canvas.mixinterface.RenderBuffersExt;
 
 @Mixin(RenderBuffers.class)
 public class MixinRenderBuffers implements RenderBuffersExt {
-	@Final @Shadow private BufferSource bufferSource;
+	@Shadow @Final private BufferSource bufferSource;
 
-	@Unique
-	private BufferSource activeBufferSource;
+	@Unique private BufferSource canvas_activeBufferSource;
+
+	@ModifyArg(
+			method = "<init>",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SectionBufferBuilderPool;allocate(I)Lnet/minecraft/client/renderer/SectionBufferBuilderPool;"))
+	private int onInitZeroListSize(int ignored) {
+		if (Configurator.enableLifeCycleDebug) {
+			CanvasMod.LOG.info("Lifecycle Event: sectionBufferPool init (zero list size)");
+		}
+
+		return 0;
+	}
 
 	@Inject(at = @At("RETURN"), method = "<init>*")
 	private void onNew(CallbackInfo ci) {
-		activeBufferSource = bufferSource;
+		canvas_activeBufferSource = bufferSource;
 	}
 
 	/**
@@ -54,12 +67,12 @@ public class MixinRenderBuffers implements RenderBuffersExt {
 	 */
 	@Overwrite
 	public MultiBufferSource.BufferSource bufferSource() {
-		return activeBufferSource;
+		return canvas_activeBufferSource;
 	}
 
 	@Override
 	public void canvas_setEntityConsumers(CanvasImmediate consumers) {
-		activeBufferSource = consumers == null ? bufferSource : consumers;
+		canvas_activeBufferSource = consumers == null ? bufferSource : consumers;
 	}
 
 	@Override

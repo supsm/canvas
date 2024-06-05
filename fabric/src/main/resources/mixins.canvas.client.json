@@ -40,7 +40,6 @@
     "MixinRenderBuffers",
     "MixinRenderTarget",
     "MixinRenderType",
-    "MixinSectionRenderDispatcher",
     "MixinSectionOcclusionGraph",
     "MixinScreenEffectRenderer",
     "MixinSimpleTexture",
