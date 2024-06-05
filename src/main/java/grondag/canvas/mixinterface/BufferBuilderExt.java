@@ -20,7 +20,6 @@
 
 package grondag.canvas.mixinterface;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 public interface BufferBuilderExt {

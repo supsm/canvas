@@ -32,7 +32,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AbstractBannerBlock;
 
 import io.vram.frex.base.renderer.context.render.ItemRenderContext;

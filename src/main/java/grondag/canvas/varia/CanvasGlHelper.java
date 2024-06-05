@@ -26,8 +26,6 @@ import org.lwjgl.opengl.GLCapabilities;
 
 import com.mojang.blaze3d.platform.GLX;
 
-import net.minecraft.client.Minecraft;
-
 import grondag.canvas.CanvasMod;
 import grondag.canvas.config.Configurator;
 

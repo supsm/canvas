@@ -138,7 +138,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack.Pose;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
