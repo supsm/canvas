@@ -109,6 +109,8 @@ class ConfigData {
 	// DEBUG
 	@Comment("Output runtime per-material shader source. For shader development debugging.")
 	boolean shaderDebug = false;
+	@Comment("Ignore texture color when rendering. Intended for debugging lighting.")
+	boolean debugLighting = false;
 	@Comment("Pre-process OpenGL source before compilation. Makes source more concise but possibly harder to read.")
 	boolean preprocessShaderSource = true;
 	//@Comment("Shows HD lightmap pixels for debug purposes. Also looks cool.")
