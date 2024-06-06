@@ -76,24 +76,32 @@ public class RenderContextState {
 		} else {
 			final State state = states.peek();
 
-			finder.copyFrom(mat);
+			if (!state.map.isIdentity() || state.guiMode != GuiMode.NONE) {
+				finder.copyFrom(mat);
 
-			state.map.map(finder, state.testObj);
+				state.map.map(finder, state.testObj);
 
-			finder.glintEntity(state.glintEntity);
+				finder.glintEntity(state.glintEntity);
 
-			if (state.testObj == null) {
-				finder.textureIndex(mat.textureIndex());
+				if (state.isItem()) {
+					finder.textureIndex(mat.textureIndex());
+				}
+
+				state.guiMode.apply(finder);
+
+				return (CanvasRenderMaterial) finder.find();
+			} else {
+				return mat;
 			}
-
-			state.guiMode.apply(finder);
-
-			return (CanvasRenderMaterial) finder.find();
 		}
 	}
 
 	@SuppressWarnings("rawtypes")
-	private record State (MaterialMap map, Object testObj, boolean glintEntity, GuiMode guiMode) { }
+	private record State (MaterialMap map, Object testObj, boolean glintEntity, GuiMode guiMode) {
+		boolean isItem() {
+			return testObj == null;
+		}
+	}
 
 	private enum GuiMode {
 		NONE() {
