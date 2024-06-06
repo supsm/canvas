@@ -34,24 +34,18 @@ import io.vram.frex.api.material.MaterialMap;
 
 public class RenderContextState {
 	private final MaterialFinder finder = MaterialFinder.newInstance();
-	private GuiMode guiMode = GuiMode.NORMAL;
 
-	// PERF: use int states and bitwise operation
-	@SuppressWarnings("rawtypes")
-	private record State (MaterialMap map, Object searchObj, boolean glintEntity) { }
-
-	// PERF: use array with failsafe
 	private final Stack<State> states = new Stack<>();
 
 	public RenderContextState() {
 	}
 
 	public void push(@Nonnull Entity entity) {
-		states.push(new State(MaterialMap.get(entity.getType()), entity, true));
+		states.push(new State(MaterialMap.get(entity.getType()), entity, true, GuiMode.NONE));
 	}
 
 	public void push(@Nonnull BlockEntity blockEntity) {
-		states.push(new State(MaterialMap.get(blockEntity.getType()), blockEntity.getBlockState(), true));
+		states.push(new State(MaterialMap.get(blockEntity.getType()), blockEntity.getBlockState(), true, GuiMode.NONE));
 	}
 
 	/**
@@ -59,8 +53,9 @@ public class RenderContextState {
 	 *
 	 * @param itemStack the item stack
 	 */
-	public void push(@Nonnull ItemStack itemStack) {
-		states.push(new State(MaterialMap.get(itemStack), null, itemStack.is(Items.TRIDENT)));
+	public void push(@Nonnull ItemStack itemStack, boolean isGui, boolean isFrontLit) {
+		final GuiMode mode = isGui ? (isFrontLit ? GuiMode.FRONT_LIT : GuiMode.NORMAL) : GuiMode.NONE;
+		states.push(new State(MaterialMap.get(itemStack), null, itemStack.is(Items.TRIDENT), mode));
 	}
 
 	public void pop() {
@@ -74,42 +69,42 @@ public class RenderContextState {
 		states.clear();
 	}
 
-	public void guiMode(GuiMode guiMode) {
-		this.guiMode = guiMode;
-	}
-
 	@SuppressWarnings("unchecked")
 	public CanvasRenderMaterial mapMaterial(CanvasRenderMaterial mat) {
-		if (states.empty() && guiMode == GuiMode.NORMAL) {
+		if (states.empty()) {
 			return mat;
 		} else {
+			final State state = states.peek();
+
 			finder.copyFrom(mat);
 
-			if (!states.empty()) {
-				final State state = states.peek();
-				state.map.map(finder, state.searchObj);
-				finder.glintEntity(state.glintEntity);
+			state.map.map(finder, state.testObj);
 
-				if (state.searchObj == null) {
-					finder.textureIndex(mat.textureIndex());
-				}
+			finder.glintEntity(state.glintEntity);
+
+			if (state.testObj == null) {
+				finder.textureIndex(mat.textureIndex());
 			}
 
-			guiMode.apply(finder);
+			state.guiMode.apply(finder);
+
 			return (CanvasRenderMaterial) finder.find();
 		}
 	}
 
-	public enum GuiMode {
-		NORMAL() {
+	@SuppressWarnings("rawtypes")
+	private record State (MaterialMap map, Object testObj, boolean glintEntity, GuiMode guiMode) { }
+
+	private enum GuiMode {
+		NONE() {
 			@Override void apply(MaterialFinder finder) { }
 		},
-		GUI_NORMAL() {
+		NORMAL() {
 			@Override void apply(MaterialFinder finder) {
 				finder.fog(false);
 			}
 		},
-		GUI_FRONT_LIT() {
+		FRONT_LIT() {
 			@Override void apply(MaterialFinder finder) {
 				finder.fog(false).disableDiffuse(true);
 			}

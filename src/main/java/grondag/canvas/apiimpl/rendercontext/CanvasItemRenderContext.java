@@ -26,9 +26,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.AbstractBannerBlock;
 
 import io.vram.frex.base.renderer.context.render.ItemRenderContext;
 
@@ -36,7 +34,6 @@ import grondag.canvas.apiimpl.rendercontext.encoder.StandardQuadEncoder;
 import grondag.canvas.buffer.input.CanvasImmediate;
 import grondag.canvas.compat.ModItemRendererHolder;
 import grondag.canvas.material.state.RenderContextState;
-import grondag.canvas.material.state.RenderContextState.GuiMode;
 
 public class CanvasItemRenderContext extends ItemRenderContext {
 	private static final Supplier<ThreadLocal<CanvasItemRenderContext>> POOL_FACTORY = () -> ThreadLocal.withInitial(() -> {
@@ -86,27 +83,13 @@ public class CanvasItemRenderContext extends ItemRenderContext {
 		final RenderContextState context = (vertexConsumers instanceof CanvasImmediate immediate) ? immediate.contextState : null;
 
 		if (context != null) {
-			final GuiMode mode;
-
-			if (inputContext.isGui()) {
-				if (inputContext.isBlockItem() && ((BlockItem) stack.getItem()).getBlock() instanceof AbstractBannerBlock) {
-					mode = GuiMode.GUI_FRONT_LIT;
-				} else {
-					mode = GuiMode.GUI_NORMAL;
-				}
-			} else {
-				mode = GuiMode.NORMAL;
-			}
-
-			context.push(stack);
-			context.guiMode(mode);
+			context.push(stack, inputContext.isGui(), inputContext.isFrontLit());
 		}
 
 		builtInRenderer.renderByItem(stack, inputContext.mode(), inputContext.matrixStack().toVanilla(), vertexConsumers, inputContext.lightmap(), inputContext.overlay());
 
 		if (context != null) {
 			context.pop();
-			context.guiMode(GuiMode.NORMAL);
 		}
 	}
 }
