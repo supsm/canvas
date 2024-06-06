@@ -254,6 +254,10 @@ public class GlShader implements Shader {
 				result = StringUtils.replace(result, "#define VERTEX_SHADER", "#define FRAGMENT_SHADER");
 			}
 
+			if (Configurator.debugLighting) {
+				result = StringUtils.replace(result, "//#define DEBUG_LIGHTING", "#define DEBUG_LIGHTING");
+			}
+
 			if (!Configurator.wavyGrass) {
 				result = StringUtils.replace(result, "#define ANIMATED_FOLIAGE", "//#define ANIMATED_FOLIAGE");
 			}
