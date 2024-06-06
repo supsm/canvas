@@ -21,9 +21,8 @@ const vec3 LIGHT2_DARK = vec3 (-0.104196384, -0.947239857,  0.303116754);
 const vec3 LIGHT1_GUI  = vec3 (-0.9334392 , 0.26269472, -0.24430016);
 const vec3 LIGHT2_GUI  = vec3 (-0.10357137, 0.9766068 ,  0.18844642);
 
-const vec3 LIGHT1_GUI_ENTITY = vec3 (0.140028   , -0.70014  , 0.70014);
-const vec3 LIGHT2_GUI_ENTITY = vec3 (-0.19611613, -0.9805807, 0.0    );
-
+const vec3 LIGHT1_GUI_ENTITY = vec3 ( 0.140028, -0.700140, -0.70014);
+const vec3 LIGHT2_GUI_ENTITY = vec3 (-0.196116, -0.980581,  0.00000);
 /**
  * Formula mimics vanilla lighting for plane-aligned quads and is vaguely
  * consistent with Phong lighting ambient + diffuse for others.
