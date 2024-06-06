@@ -54,6 +54,7 @@ public class Configurator {
 	public static int dynamicFrustumPadding = DEFAULTS.dynamicFrustumPadding;
 	public static boolean cullParticles = DEFAULTS.cullParticles;
 	public static StartupFinalBoolean useCombinedThreadPool = new StartupFinalBoolean(DEFAULTS.useCombinedThreadPool);
+	public static boolean debugLighting = DEFAULTS.debugLighting;
 	public static boolean shaderDebug = DEFAULTS.shaderDebug;
 	public static boolean preprocessShaderSource = DEFAULTS.preprocessShaderSource;
 	// public static boolean lightmapDebug = DEFAULTS.lightmapDebug;
@@ -127,6 +128,7 @@ public class Configurator {
 		wavyGrass = config.wavyGrass;
 		disableVignette = config.disableVignette;
 
+		debugLighting = config.debugLighting;
 		shaderDebug = config.shaderDebug;
 		preprocessShaderSource = config.preprocessShaderSource;
 		//maxLightmapDelayFrames = config.maxLightmapDelayFrames;
@@ -193,6 +195,7 @@ public class Configurator {
 		config.wavyGrass = wavyGrass;
 		config.disableVignette = disableVignette;
 
+		config.debugLighting = debugLighting;
 		config.shaderDebug = shaderDebug;
 		config.preprocessShaderSource = preprocessShaderSource;
 		//config.maxLightmapDelayFrames = maxLightmapDelayFrames;

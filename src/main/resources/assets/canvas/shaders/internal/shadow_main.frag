@@ -29,8 +29,12 @@ void main() {
 #ifdef _CV_FRAGMENT_COMPAT
 	compatData = frx_FragmentData(frx_sampleColor, frx_vertexColor);
 #endif
-	
+
+#ifdef DEBUG_LIGHTING
+	frx_fragColor = vec4(1.0, 1.0, 1.0, frx_sampleColor.a) * frx_vertexColor;
+#else
 	frx_fragColor = frx_sampleColor * frx_vertexColor;
+#endif
 
 	_cv_startFragment();
 
