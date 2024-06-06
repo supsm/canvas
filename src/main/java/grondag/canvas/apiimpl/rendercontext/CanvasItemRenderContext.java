@@ -76,16 +76,6 @@ public class CanvasItemRenderContext extends ItemRenderContext {
 	}
 
 	@Override
-	public void renderItem(ItemModelShaper models, ItemStack stack, ItemDisplayContext renderMode, boolean isLeftHand, PoseStack poseStack, MultiBufferSource vertexConsumers, int light, int overlay, BakedModel model) {
-		if (renderMode == ItemDisplayContext.GUI && (!model.isCustomRenderer() || stack.getItem() instanceof BlockItem)) {
-			// GUI Item shading hack
-			poseStack.last().normal().scale(1.0f, -1.0f, 1.0f);
-		}
-
-		super.renderItem(models, stack, renderMode, isLeftHand, poseStack, vertexConsumers, light, overlay, model);
-	}
-
-	@Override
 	protected void renderCustomModel(BlockEntityWithoutLevelRenderer builtInRenderer, MultiBufferSource vertexConsumers) {
 		final BlockEntityWithoutLevelRenderer customRenderer = ModItemRendererHolder.rendererGetter.apply(inputContext.itemStack(), builtInRenderer);
 

@@ -37,6 +37,14 @@ import grondag.canvas.shader.data.ContextFlagState;
 public class MixinInventoryScreen {
 	@Inject(
 			method = "renderEntityInInventory",
+			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V", shift = At.Shift.AFTER))
+	private static void afterPoseScale(GuiGraphics guiGraphics, float f, float g, float h, Vector3f vector3f, Quaternionf quaternionf, Quaternionf quaternionf2, LivingEntity livingEntity, CallbackInfo ci) {
+		// 1.20.5: Player in Inventory Shading Hack
+		guiGraphics.pose().last().normal().scale(1.0f, 1.0f, -1.0f);
+	}
+
+	@Inject(
+			method = "renderEntityInInventory",
 			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;runAsFancy(Ljava/lang/Runnable;)V"))
 	private static void beforeRenderEntity(GuiGraphics guiGraphics, float f, float g, float h, Vector3f vector3f, Quaternionf quaternionf, Quaternionf quaternionf2, LivingEntity livingEntity, CallbackInfo ci) {
 		ContextFlagState.setRenderingEntityInGui(true);

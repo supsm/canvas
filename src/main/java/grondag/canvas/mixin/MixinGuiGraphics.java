@@ -34,6 +34,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import grondag.canvas.buffer.input.CanvasImmediate;
 import grondag.canvas.mixinterface.LevelRendererExt;
@@ -99,5 +102,13 @@ public abstract class MixinGuiGraphics {
 		}
 
 		ContextFlagState.setRenderingEntityInGui(false);
+	}
+
+	@Inject(
+			method = "Lnet/minecraft/client/gui/GuiGraphics;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;IIII)V",
+			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;scale(FFF)V", shift = At.Shift.AFTER))
+	private void afterPoseScale(LivingEntity livingEntity, Level level, ItemStack itemStack, int i, int j, int k, int l, CallbackInfo ci) {
+		// 1.20.5: GUI Item shading hack
+		pose.last().normal().scale(1.0f, -1.0f, 1.0f);
 	}
 }
