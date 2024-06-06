@@ -29,11 +29,15 @@ void main() {
 	compatData = frx_FragmentData(frx_sampleColor, frx_vertexColor);
 #endif
 
+#ifdef DEBUG_LIGHTING
+	frx_fragColor = vec4(1.0, 1.0, 1.0, frx_sampleColor.a) * frx_vertexColor;
+#else
 	if (_cvu_context[_CV_TARGET_INDEX] == 1) {
 		frx_fragColor = vec4(1.0, 1.0, 1.0, frx_sampleColor.a) * frx_vertexColor;
 	} else {
 		frx_fragColor = frx_sampleColor * frx_vertexColor;
 	}
+#endif
 
 	frx_fragEmissive = frx_matEmissive;
 	frx_fragLight = frx_vertexLight;

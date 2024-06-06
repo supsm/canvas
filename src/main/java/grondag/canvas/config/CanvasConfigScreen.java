@@ -329,6 +329,15 @@ public class CanvasConfigScreen extends BaseScreen {
 				DEFAULTS.shaderDebug,
 				"config.canvas.help.shader_debug").listItem());
 
+		list.addItem(optionSession.booleanOption("config.canvas.value.debug_lighting",
+				() -> editing.debugLighting,
+				b -> {
+					reload |= Configurator.debugLighting != b;
+					editing.debugLighting = b;
+				},
+				DEFAULTS.debugLighting,
+				"config.canvas.help.debug_lighting").listItem());
+
 		list.addItem(optionSession.booleanOption("config.canvas.value.preprocess_shader_source",
 				() -> editing.preprocessShaderSource,
 				b -> {
